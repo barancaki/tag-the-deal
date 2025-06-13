@@ -1,2 +1,0 @@
-
-for this application , you need to install chrome webdriver and cath the path of file then write in driver_path
