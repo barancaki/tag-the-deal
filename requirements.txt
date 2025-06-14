@@ -2,5 +2,3 @@ selenium
 bs4
 pandas
 openpyxl
-os
-platform
