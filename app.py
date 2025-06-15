@@ -19,13 +19,14 @@ def run_scraper(product, range_1, range_2):
     st.success("Scraping completed successfully.")
 
 def main():
+    st.logo("TTD_logo.png",size="large")
     st.title("Tag The Deal")
 
     product = st.text_input("Ürün Adı")
     range_1 = st.number_input("Başlangıç Sayfası", min_value=1, step=1)
     range_2 = st.number_input("Bitiş Sayfası", min_value=range_1, step=1)
 
-    if st.button("Scrape"):
+    if st.button("Getir !"):
         if not product or range_1 > range_2:
             st.error("Lütfen tüm alanları doğru şekilde doldurun.")
         else:

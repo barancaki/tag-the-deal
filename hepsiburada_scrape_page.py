@@ -3,6 +3,7 @@ from selenium.common.exceptions import NoSuchElementException
 from driver.setup_driver import setup_driver
 from web_functions.scroll_to_bottom import scroll_to_bottom
 import streamlit
+import pandas as pd
 
 def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, st=None):
     url = f"https://www.hepsiburada.com/ara?q={product}&sayfa={page_num}"
@@ -13,11 +14,14 @@ def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, 
     try:
         main_table = driver.find_element(By.ID, f"{page_num}")
     except NoSuchElementException:
-        if st:
-            st.warning(f"Sayfa {page_num} için ana tablo bulunamadı.")
+        if streamlit:
+            streamlit.warning(f"Sayfa {page_num} için ana tablo bulunamadı.")
         else:
             print(f"Sayfa {page_num} için ana tablo bulunamadı.")
         return
+
+    # Ürünleri biriktirmek için liste oluştur
+    products = []
 
     for i in range(first_value, last_value):
         try:
@@ -54,19 +58,23 @@ def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, 
             except NoSuchElementException:
                 product_website = if_not
 
-            output = f'''Product {i+1} (Sayfa {page_num})
-Product Brand : {product_brand}
-Product Name : {product_name}
-Product Star : {star_rating}
-Product Comment : {count_of_comments}
-Final Product Price : {final_product_price}
-Product Website : {product_website}
--------------------------------'''
-
-            if streamlit:
-                streamlit.text(output)
-            else:
-                print(output)
+            # Her ürünü sözlük olarak ekle
+            products.append({
+                "Ürün Markası": product_brand,
+                "Ürün İsmi": product_name,
+                "Ürün 5 Üzerinden Kaç Yıldız": star_rating,
+                "Ürün Yorum Sayısı": count_of_comments,
+                "Ürün Son Fiyatı": final_product_price,
+                "Ürün Websitesi": product_website
+            })
 
         except Exception as e:
             pass
+
+    # Döngü bittikten sonra tüm ürünleri tek tablo olarak göster
+    if products:
+        pd_table = pd.DataFrame(products)
+        if streamlit:
+            streamlit.dataframe(pd_table)
+        else:
+            print(pd_table)
