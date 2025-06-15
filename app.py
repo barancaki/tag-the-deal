@@ -19,18 +19,26 @@ def run_scraper(product, range_1, range_2):
     st.success("Scraping completed successfully.")
 
 def main():
-    st.logo("TTD_logo.png",size="large")
+    st.image("TTD_logo.png")
     st.title("Tag The Deal")
+    if st.button("Hepsiburada"):
+        st.session_state = "Hepsiburada"
+    if st.button("Trendyol"):
+        st.session_state = "Trendyol"
+    if st.button("Amazon"):
+        st.session_state = "Amazon"
+    st.text("Dahası yakın zamanda ...")
+        
+    if st.session_state == "Hepsiburada":
+        product = st.text_input("Hepsiburada Ürün Adı")
+        range_1 = st.number_input("Hepsiburada Başlangıç Sayfası", min_value=1, step=1)
+        range_2 = st.number_input("Hepsiburada Bitiş Sayfası", min_value=range_1, step=1)
 
-    product = st.text_input("Ürün Adı")
-    range_1 = st.number_input("Başlangıç Sayfası", min_value=1, step=1)
-    range_2 = st.number_input("Bitiş Sayfası", min_value=range_1, step=1)
-
-    if st.button("Getir !"):
-        if not product or range_1 > range_2:
-            st.error("Lütfen tüm alanları doğru şekilde doldurun.")
-        else:
-            run_scraper(product, int(range_1), int(range_2))
+        if st.button("Getir !"):
+            if not product or not range_1 or not range_2 or range_1 > range_2:
+                st.error("Lütfen tüm alanları doğru şekilde doldurun.")
+            else:
+                run_scraper(product, int(range_1), int(range_2))
 
 if __name__ == "__main__":
     main()
