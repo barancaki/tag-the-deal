@@ -1,6 +1,6 @@
 import sys
 from driver.setup_driver import setup_driver
-from hepsiburada_scrape_page import hepsiburada_scrape_page
+from scrape_page.hepsiburada_scrape_page import hepsiburada_scrape_page
 
 def run_scraper(product, range_1, range_2):
     count_1 = 0
