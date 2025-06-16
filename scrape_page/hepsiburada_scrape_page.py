@@ -4,6 +4,19 @@ from driver.setup_driver import setup_driver
 from web_functions.scroll_to_bottom import scroll_to_bottom
 import streamlit
 import pandas as pd
+import re
+
+def extract_price_number(price_text):
+    # Sadece rakamları ve virgül/noktayı al, ondalık ayracı için
+    match = re.search(r"([\d.,]+)", price_text.replace(" ", ""))
+    if match:
+        # Nokta ve virgül ayrımı için Türkçe fiyatlarda genelde virgül ondalık, nokta binlik ayırıcıdır
+        number = match.group(1).replace(".", "").replace(",", ".")
+        try:
+            return float(number)
+        except ValueError:
+            return None
+    return None
 
 def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, st=None):
     url = f"https://www.hepsiburada.com/ara?q={product}&sayfa={page_num}"
@@ -52,6 +65,9 @@ def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, 
             except NoSuchElementException:
                 final_product_price = if_not
 
+            # Fiyatı sayıya çevir
+            final_product_price_number = extract_price_number(final_product_price)
+
             try:
                 product_card = table.find_element(By.CLASS_NAME, "productCard-module_article__HJ97o")
                 product_website = product_card.find_element(By.TAG_NAME, "a").get_attribute("href")
@@ -65,6 +81,7 @@ def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, 
                 "Ürün 5 Üzerinden Kaç Yıldız": star_rating,
                 "Ürün Yorum Sayısı": count_of_comments,
                 "Ürün Son Fiyatı": final_product_price,
+                "Fiyat (Sayı)": final_product_price_number,
                 "Ürün Websitesi": product_website
             })
 
@@ -74,7 +91,13 @@ def hepsiburada_scrape_page(driver, page_num, product, first_value, last_value, 
     # Döngü bittikten sonra tüm ürünleri tek tablo olarak göster
     if products:
         pd_table = pd.DataFrame(products)
+
         if streamlit:
-            streamlit.dataframe(pd_table)
+            # Veriyi session_state'te sakla
+            if "pd_table" not in streamlit.session_state:
+                streamlit.session_state["pd_table"] = pd_table
+
+            streamlit.dataframe(streamlit.session_state["pd_table"])
+
         else:
             print(pd_table)
